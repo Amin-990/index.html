@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نورانی قاعدہ (پشتو) مکمل</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Optional: Add custom styles if needed */
+        body {
+            font-family: 'Noto Nastaliq Urdu', sans-serif; /* More appropriate font for Urdu/Pashto */
+        }
+        /* Ensure image scales nicely */
+        #qaida-image {
+             max-width: 100%;
+             height: auto;
+             display: block; /* Prevents extra space below image */
+        }
+        /* Style buttons for better visibility */
+        button {
+            transition: background-color 0.3s ease;
+        }
+    </style>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-yellow-100 text-center">
+    <div class="max-w-md mx-auto mt-5 sm:mt-10 p-4 sm:p-6 bg-white rounded-2xl shadow-lg">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-green-700">نورانی قاعدہ (پشتو)</h1>
+
+        <div id="page-content" class="mb-4 sm:mb-6">
+            <div class="w-full max-w-xs sm:max-w-sm mx-auto bg-gray-200 rounded-xl shadow-md overflow-hidden">
+                 <img id="qaida-image" src="https://via.placeholder.com/350x500/cccccc/888888?text=Page+1" alt="صفحہ 1" class="mx-auto">
+            </div>
+             </div>
+
+        <div class="flex justify-between items-center mt-4">
+             <button id="prev-btn" onclick="prevPage()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                وروستو
+            </button>
+             <div class="text-gray-600 text-sm sm:text-base">
+                <span id="page-number">صفحہ 1 / 32</span>
+            </div>
+             <button id="next-btn" onclick="nextPage()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                مخکی
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const totalPages = 32; // Total number of pages
+        const pagesData = [
+            // Define the first page with the actual image URL
+            { img: "https://i.postimg.cc/BbHyP9Kj/01.jpg" }, // Page 1
+            // Add actual image URLs for the remaining pages
+            { img: "https://i.postimg.cc/NMWS0f5h/02.jpg" }, // Page 2
+            { img: "https://i.postimg.cc/MKJg2TCV/03.jpg" }, // Page 3
+            { img: "https://i.postimg.cc/nVDNP7Pn/04.jpg" }, // Page 4
+            { img: "https://i.postimg.cc/4NvqJGGM/05.jpg" }, // Page 5
+            { img: "https://i.postimg.cc/Sxy5RPNK/06.jpg" }, // Page 6
+            { img: "https://i.postimg.cc/7ZmR2Nfn/07.jpg" }, // Page 7
+            { img: "https://i.postimg.cc/s2xN9ZWd/08.jpg" }, // Page 8
+            { img: "https://i.postimg.cc/mrn6d23c/09.jpg" }, // Page 9
+            { img: "https://i.postimg.cc/3N5fTScY/10.jpg" }, // Page 10
+            { img: "https://i.postimg.cc/gJ6t1F4g/11.jpg" }, // Page 11
+            { img: "https://i.postimg.cc/VvqGLqxM/12.jpg" }, // Page 12
+            { img: "https://i.postimg.cc/59Lk3JX0/13.jpg" }, // Page 13
+            { img: "https://i.postimg.cc/Yqxn5xfB/14.jpg" }, // Page 14
+            { img: "https://i.postimg.cc/CL0rr284/15.jpg" }, // Page 15
+            { img: "https://i.postimg.cc/dVtHwT4k/16.jpg" }, // Page 16
+            { img: "https://i.postimg.cc/RZsPFVDP/17.jpg" }, // Page 17
+            { img: "https://i.postimg.cc/Xvrsy6Mn/18.jpg" }, // Page 18
+            { img: "https://i.postimg.cc/1zbJG7Pw/19.jpg" }, // Page 19
+            { img: "https://i.postimg.cc/Ss8VDLN5/20.jpg" }, // Page 20
+            { img: "https://i.postimg.cc/sxrm8BM2/21.jpg" }, // Page 21
+            { img: "https://i.postimg.cc/J05xW1X5/22.jpg" }, // Page 22
+            { img: "https://i.postimg.cc/v8r3nvKx/23.jpg" }, // Page 23
+            { img: "https://i.postimg.cc/zXqpFgmt/24.jpg" }, // Page 24
+            { img: "https://i.postimg.cc/Yq8RnCMp/25.jpg" }, // Page 25
+            { img: "https://i.postimg.cc/W13nQc10/26.jpg" }, // Page 26
+            { img: "https://i.postimg.cc/52R3JKXT/27.jpg" }, // Page 27
+            { img: "https://i.postimg.cc/MTkmMcbY/28.jpg" }, // Page 28
+            { img: "https://i.postimg.cc/Dz4cwQsZ/29.jpg" }, // Page 29
+            { img: "https://i.postimg.cc/0Qpdp8V1/30.jpg" }, // Page 30
+            { img: "https://i.postimg.cc/L52kDrWY/31.jpg" }, // Page 31
+            { img: "https://i.postimg.cc/8c4R0Z8y/32.jpg" }  // Page 32
+        ];
+
+        // --- State ---
+        let currentPage = 0; // Index of the current page (0-based)
+
+        // --- DOM Elements ---
+        const qaidaImage = document.getElementById('qaida-image');
+        const pageNumberDisplay = document.getElementById('page-number');
+        const prevButton = document.getElementById('prev-btn');
+        const nextButton = document.getElementById('next-btn');
+
+        // --- Functions ---
+
+        /**
+         * Updates the displayed page content (image and page number)
+         * and disables/enables navigation buttons.
+         */
+        function updatePage() {
+            // Ensure currentPage is within bounds
+            if (currentPage < 0) currentPage = 0;
+            if (currentPage >= pagesData.length) currentPage = pagesData.length - 1;
+
+            // Update the image source and alt text
+            qaidaImage.src = pagesData[currentPage].img;
+            qaidaImage.alt = `صفحہ ${currentPage + 1}`; // Update alt text
+
+            // Update the page number display
+            pageNumberDisplay.innerText = `صفحہ ${currentPage + 1} / ${pagesData.length}`;
+
+            // Update button states
+            prevButton.disabled = (currentPage === 0);
+            nextButton.disabled = (currentPage === pagesData.length - 1);
+
+             // Add error handling for image loading
+            qaidaImage.onerror = function() {
+                console.error("Error loading image:", pagesData[currentPage].img);
+                // Optionally display a fallback or error message on the image itself
+                qaidaImage.src = `https://via.placeholder.com/350x500/f87171/ffffff?text=Error+Loading+Page+${currentPage + 1}`; // Red error placeholder
+                qaidaImage.alt = `صفحہ ${currentPage + 1} لوڈ کرنے میں خرابی`;
+            };
+        }
+
+        /**
+         * Navigates to the next page if possible.
+         */
+        function nextPage() {
+            if (currentPage < pagesData.length - 1) {
+                currentPage++;
+                updatePage();
+            }
+        }
+
+        /**
+         * Navigates to the previous page if possible.
+         */
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                updatePage();
+            }
+        }
+
+        // --- Initialization ---
+        // Set the initial page when the DOM is fully loaded
+        window.addEventListener('DOMContentLoaded', updatePage);
+
+    </script>
+</body>
+</html>
+    
