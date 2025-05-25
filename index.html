@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کلاس ریکارڈ مینیجر</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Nastaliq Urdu', serif;
+        }
+        .record-item {
+            cursor: pointer;
+        }
+        #classListContainer {
+            display: none;
+        }
+        #classListContainer.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-center mb-4">استاد ڈائری</h1>
+
+        <form id="recordForm" class="space-y-4">
+            <div>
+                <label class="block">تاریخ منتخب کریں:</label>
+                <input type="date" id="recordDate" class="w-full border p-2 rounded">
+            </div>
+            <div>
+                <label class="block">کلاس:</label>
+                <select id="class" class="w-full border p-2 rounded">
+                    <option value="">منتخب کریں</option>
+                    <option value="6">کلاس 6</option>
+                    <option value="7">کلاس 7</option>
+                    <option value="8">کلاس 8</option>
+                    <option value="9">کلاس 9</option>
+                    <option value="10">کلاس 10</option>
+                </select>
+            </div>
+            <div>
+                <label class="block">مضمون (پیریڈ):</label>
+                <select id="period" class="w-full border p-2 rounded">
+                    <option value="">منتخب کریں</option>
+                    <option value="مطالعہ قرآن">مطالعہ قرآن</option>
+                    <option value="اسلامیات">اسلامیات</option>
+                    <option value="اردو">اردو</option>
+                    <option value="انگریزی">انگریزی</option>
+                    <option value="ریاضی">ریاضی</option>
+                    <option value="پشتو">پشتو</option>
+                    <option value="جنرل سائنس">جنرل سائنس</option>
+                    <option value="بیالوجی">بیالوجی</option>
+                    <option value="کمسٹری">کمسٹری</option>
+                    <option value="فزکس">فزکس</option>
+                    <option value="ڈرائنگ">ڈرائنگ</option>
+                    <option value="تاریخ">تاریخ</option>
+                    <option value="جغرافیہ">جغرافیہ</option>
+                    <option value="کمپیوٹر">کمپیوٹر</option>
+                    <option value="عربی">عربی</option>
+                    <option value="ایچ پی ای">ایچ پی ای</option>
+                    <option value="قرأت">قرأت</option>
+                </select>
+            </div>
+            <div>
+                <label class="block">لیسن پلان:</label>
+                <textarea id="lessonPlan" class="w-full border p-2 rounded" rows="3"></textarea>
+            </div>
+            <div>
+                <label class="block">گھر کا کام:</label>
+                <textarea id="homework" class="w-full border p-2 rounded" rows="3"></textarea>
+            </div>
+            <div>
+                <label class="block">استاد کی ڈائری:</label>
+                <textarea id="teacherNote" class="w-full border p-2 rounded" rows="3"></textarea>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">ریکارڈ شامل کریں</button>
+        </form>
+
+        <div class="flex justify-between mt-4">
+            <button onclick="exportToPDF()" class="bg-green-500 text-white px-4 py-2 rounded">پی ڈی ایف ایکسپورٹ</button>
+            <button onclick="window.print()" class="bg-yellow-500 text-white px-4 py-2 rounded">پرنٹ کریں</button>
+        </div>
+
+        <hr class="my-6">
+
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">کلاس لسٹ</h2>
+            <button id="toggleClassListButton" class="bg-indigo-500 text-white px-3 py-1 rounded">
+                لسٹ دکھائیں
+            </button>
+        </div>
+        <div id="classListContainer">
+            <ul id="classList" class="space-y-2">
+                </ul>
+        </div>
+
+        <hr class="my-6">
+
+        <div id="classRecordsList" class="space-y-2 hidden">
+            <h2 class="text-xl font-bold mb-2">کلاس کے ریکارڈز: <span id="selectedClass"></span></h2>
+            <ol id="recordsForClass" class="space-y-2"></ol>
+            <button id="hideRecordsButton" class="mt-4 bg-gray-500 text-white px-3 py-1 rounded">
+                ریکارڈز چھپائیں
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const recordForm = document.getElementById('recordForm');
+        const classList = document.getElementById('classList');
+        const classRecordsList = document.getElementById('classRecordsList');
+        const recordsForClass = document.getElementById('recordsForClass');
+        const selectedClassDisplay = document.getElementById('selectedClass');
+        const toggleClassListButton = document.getElementById('toggleClassListButton');
+        const classListContainer = document.getElementById('classListContainer');
+        const hideRecordsButton = document.getElementById('hideRecordsButton');
+
+        let records = JSON.parse(localStorage.getItem('classRecords')) || [];
+        let isClassListVisible = false;
+
+        function updateClassList() {
+            const uniqueClasses = [...new Set(records.map(record => record.classValue))];
+            classList.innerHTML = '';
+            uniqueClasses.forEach(className => {
+                const li = document.createElement('li');
+                li.className = 'bg-gray-200 p-3 rounded record-item';
+                li.textContent = `کلاس ${className}`;
+                li.addEventListener('click', () => showRecordsForClass(className));
+                classList.appendChild(li);
+            });
+        }
+
+        function showRecordsForClass(className) {
+            const filteredRecords = records.filter(record => record.classValue === className);
+            recordsForClass.innerHTML = '';
+            if (filteredRecords.length > 0) {
+                filteredRecords.forEach((record, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'bg-gray-300 p-3 rounded flex justify-between items-center';
+                    li.innerHTML = `
+                        <div>
+                            <strong>ریکارڈ #${index + 1}</strong><br>
+                            <strong>تاریخ:</strong> ${record.date} <br>
+                            <strong>مضمون:</strong> ${record.period} <br>
+                            <strong>لیسن پلان:</strong> ${record.lessonPlan} <br>
+                            <strong>گھر کا کام:</strong> ${record.homework} <br>
+                            <strong>استاد کی ڈائری:</strong> ${record.teacherNote}
+                        </div>
+                        <div>
+                            <button class="bg-yellow-500 text-white px-2 py-1 rounded mr-1" onclick="editRecord(${index}, '${className}')">ایڈٹ کریں</button>
+                            <button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteRecord(${index}, '${className}')">ڈیلیٹ کریں</button>
+                        </div>
+                    `;
+                    recordsForClass.appendChild(li);
+                });
+                selectedClassDisplay.textContent = className;
+                classRecordsList.classList.remove('hidden');
+            } else {
+                recordsForClass.innerHTML = '<p>اس کلاس کے لیے کوئی ریکارڈ موجود نہیں ہے۔</p>';
+                selectedClassDisplay.textContent = className;
+                classRecordsList.classList.remove('hidden');
+            }
+        }
+
+        recordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const classValue = document.getElementById('class').value;
+            const period = document.getElementById('period').value;
+            const lessonPlan = document.getElementById('lessonPlan').value;
+            const homework = document.getElementById('homework').value;
+            const teacherNote = document.getElementById('teacherNote').value;
+            const recordDate = document.getElementById('recordDate').value;
+
+            if (classValue && period && lessonPlan && homework && recordDate) {
+                const record = {
+                    classValue,
+                    period,
+                    lessonPlan,
+                    homework,
+                    teacherNote,
+                    date: new Date(recordDate).toLocaleDateString('ur-PK')
+                };
+
+                records.push(record);
+                localStorage.setItem('classRecords', JSON.stringify(records));
+                updateClassList();
+                recordForm.reset();
+                classRecordsList.classList.add('hidden');
+            } else {
+                alert('براہ کرم تمام فیلڈز مکمل کریں۔');
+            }
+        });
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 10;
+
+            if (records.length === 0) {
+                doc.text("کوئی ریکارڈ موجود نہیں ہے", 10, y);
+                doc.save('class-records.pdf');
+                return;
+            }
+
+            records.forEach((rec, i) => {
+                doc.text(`ریکارڈ #${i + 1}`, 10, y);
+                doc.text(`تاریخ: ${rec.date}`, 10, y + 10);
+                doc.text(`کلاس: ${rec.classValue}`, 10, y + 20);
+                doc.text(`مضمون: ${rec.period}`, 10, y + 30);
+                doc.text(`لیسن پلان: ${rec.lessonPlan}`, 10, y + 40);
+                doc.text(`گھر کا کام: ${rec.homework}`, 10, y + 50);
+                doc.text(`استاد کی ڈائری: ${rec.teacherNote}`, 10, y + 60);
+                y += 70;
+                if (y > 270) {
+                    doc.addPage();
+                    y = 10;
+                }
+            });
+            doc.save('class-records.pdf');
+        }
+
+        function printRecords() {
+            if (records.length === 0) {
+                alert("کوئی ریکارڈ موجود نہیں ہے جسے پرنٹ کیا جاسکے۔");
+                return;
+            }
+            let printContent = `
+                <!DOCTYPE html>
+                <html lang="ur">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>کلاس ریکارڈز</title>
+                    <style>
+                      body {
+                        font-family: 'Noto Nastaliq Urdu', serif;
+                        direction: rtl;
+                        padding: 20px;
+                      }
+                      h1 {
+                        text-align: center;
+                        margin-bottom: 20px;
+                      }
+                      table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 20px;
+                      }
+                      th, td {
+                        border: 1px solid #ddd;
+                        padding: 8px;
+                        text-align: right;
+                      }
+                      th {
+                        background-color: #f0f0f0;
+                      }
+                    </style>
+                </head>
+                <body>
+                    <h1>کلاس ریکارڈز</h1>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ریکارڈ نمبر</th>
+                                <th>تاریخ</th>
+                                <th>کلاس</th>
+                                <th>مضمون</th>
+                                <th>لیسن پلان</th>
+                                <th>گھر کا کام</th>
+                                <th>استاد کی ڈائری</th>
+                                <th>ایکشن</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            records.forEach((record, index) => {
+                printContent += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${record.date}</td>
+                                <td>${record.classValue}</td>
+                                <td>${record.period}</td>
+                                <td>${record.lessonPlan}</td>
+                                <td>${record.homework}</td>
+                                <td>${record.teacherNote}</td>
+                                 <td>
+                                    <button class="bg-yellow-500 text-white px-2 py-1 rounded mr-1" onclick="editRecord(${index}, '${record.classValue}')">ایڈٹ کریں</button>
+                                    <button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteRecord(${index}, '${record.classValue}')">ڈیلیٹ کریں</button>
+                                </td>
+                            </tr>
+                `;
+            });
+
+            printContent += `
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+            printWindow.close();
+        }
+
+        function deleteRecord(index, className) {
+            if (confirm("کیا آپ اس ریکارڈ کو حذف کرنا چاہتے ہیں؟")) {
+                records.splice(index, 1);
+                localStorage.setItem('classRecords', JSON.stringify(records));
+                updateClassList();
+                if (records.filter(r => r.classValue === className).length === 0) {
+                    classRecordsList.classList.add('hidden');
+                } else {
+                    showRecordsForClass(className);
+                }
+            }
+        }
+
+        function editRecord(index, className) {
+            const record = records[index];
+            document.getElementById('recordDate').value = record.date;
+            document.getElementById('class').value = record.classValue;
+            document.getElementById('period').value = record.period;
+            document.getElementById('lessonPlan').value = record.lessonPlan;
+            document.getElementById('homework').value = record.homework;
+            document.getElementById('teacherNote').value = record.teacherNote;
+
+            records.splice(index, 1);
+            localStorage.setItem('classRecords', JSON.stringify(records));
+
+            updateClassList();
+            showRecordsForClass(className);
+            recordForm.querySelector('button[type="submit"]').textContent = "ریکارڈ اپ ڈیٹ کریں";
+
+            recordForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const updatedClassValue = document.getElementById('class').value;
+                const updatedPeriod = document.getElementById('period').value;
+                const updatedLessonPlan = document.getElementById('lessonPlan').value;
+                const updatedHomework = document.getElementById('homework').value;
+                const updatedTeacherNote = document.getElementById('teacherNote').value;
+                const updatedRecordDate = document.getElementById('recordDate').value;
+
+                const updatedRecord = {
+                    classValue: updatedClassValue,
+                    period: updatedPeriod,
+                    lessonPlan: updatedLessonPlan,
+                    homework: updatedHomework,
+                    teacherNote: updatedTeacherNote,
+                    date: new Date(updatedRecordDate).toLocaleDateString('ur-PK')
+                };
+
+                records.push(updatedRecord);
+                localStorage.setItem('classRecords', JSON.stringify(records));
+                updateClassList();
+                showRecordsForClass(className);
+                recordForm.reset();
+                recordForm.querySelector('button[type="submit"]').textContent = "ریکارڈ شامل کریں";
+                classRecordsList.classList.add('hidden');
+            }, { once: true });
+        }
+
+        toggleClassListButton.addEventListener('click', () => {
+            isClassListVisible = !isClassListVisible;
+            classListContainer.style.display = isClassListVisible ? 'block' : 'none';
+            toggleClassListButton.textContent = isClassListVisible ? 'لسٹ چھپائیں' : 'لسٹ دکھائیں';
+        });
+
+        hideRecordsButton.addEventListener('click', () => {
+            classRecordsList.classList.add('hidden');
+        });
+
+        // exportToPDF اور printRecords فنکشنز کو کال کرنے کے لیے گلوبل دائرہ کار میں منتقل کریں۔
+        window.exportToPDF = exportToPDF;
+        window.printRecords = printRecords;
+        window.deleteRecord = deleteRecord;
+        window.editRecord = editRecord;
+        updateClassList();
+    </script>
+</body>
+</html>
+
+
+
+
+
+ڈیزائن: قاری فضل آمین مشوانی
