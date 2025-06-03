@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاضری رجسٹر</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif; /* Jameel Noori Nastaleeq as primary font */
+            background-color: #f4f7f6; /* Light grayish green background */
+        }
+        .table-container {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 320px; /* Adjusted minimum width for new columns */
+        }
+        th, td {
+            border: 1px solid #A0AEC0; /* Medium gray border */
+            padding: 3px; /* Further reduced padding */
+            text-align: center;
+            white-space: nowrap;
+            font-size: 0.75em; /* Smaller font for table content */
+        }
+        th {
+            background-color: #E2E8F0; /* Light gray-blue header */
+        }
+        /* General styling for form controls */
+        select, input[type="text"], input[type="number"], input[type="date"], button {
+            padding: 5px 8px; /* Reduced padding for inputs/buttons */
+            border-radius: 6px; /* Slightly smaller border-radius */
+            border: 1px solid #CBD5E0; /* Light gray border */
+            margin: 2px; /* Reduced margin */
+            font-family: 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif; /* Ensure font consistency */
+            font-size: 0.85em; /* Smaller font for controls */
+        }
+        button {
+            background-color: #4A90E2; /* Pleasant blue */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #357ABD; /* Darker blue on hover */
+        }
+        .header-controls {
+            background-color: #ffffff;
+            padding: 10px; /* Further reduced padding */
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex; /* Use flexbox */
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            align-items: center; /* Align items vertically in the center */
+            gap: 8px; /* Reduced spacing between items */
+            justify-content: center; /* Center items horizontally */
+        }
+        .header-controls > div {
+            display: flex; /* Make each input group a flex container */
+            align-items: center; /* Align label and input horizontally in the center */
+            flex-grow: 0; /* Prevent items from growing too much */
+            flex-shrink: 0; /* Prevent items from shrinking too much */
+            margin: 0 4px; /* Add some horizontal margin between groups */
+        }
+        .header-controls label {
+            margin-bottom: 0px; /* Remove space below labels */
+            font-size: 0.8em; /* Smaller font for labels */
+            margin-right: 4px; /* Space between label and input for RTL */
+            white-space: nowrap; /* Prevent label from wrapping */
+        }
+        .header-controls input[type="text"] {
+            width: 100px; /* Specific width for register title input */
+            text-align: right; /* Align text to the right for Urdu */
+        }
+        .header-controls input[type="date"] {
+            width: 130px; /* Specific width for date input */
+            text-align: right; /* Align text to the right for Urdu */
+        }
+        .header-controls button {
+            flex-shrink: 0; /* Prevent button from shrinking */
+            min-width: 80px; /* Ensure button has a reasonable minimum width */
+            margin-left: 10px; /* Add space before the button */
+        }
+
+        .footer-actions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 90%; /* Max width for modals */
+            max-height: 90%; /* Max height for modals */
+            overflow-y: auto; /* Enable scrolling for modal content */
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4A90E2;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Styles for select dropdown within the attendance column */
+        .attendance-select-dropdown {
+            width: 100%;
+            padding: 1px; /* Very small padding for compactness */
+            border-radius: 4px;
+            border: 1px solid #CBD5E0;
+            font-size: 0.7em; /* Small font size */
+            text-align: right; /* Align text to the right for Urdu */
+            height: 24px; /* Fixed height for consistency */
+            font-family: 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif;
+        }
+        .student-name-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* Align content to the left (start) for RTL */
+            width: 100%; /* Take full width of the cell */
+            flex-direction: row; /* Default, but explicit for clarity */
+        }
+        .student-name-input {
+            flex-grow: 1; /* Allow input to grow and fill space */
+            text-align: right; /* Keep text right-aligned within the input */
+            width: 60px; /* Further reduced width for student name input */
+            font-family: 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif;
+        }
+        .absent-indicator {
+            color: red;
+            font-size: 0.9em; /* Slightly larger for visibility */
+            margin-right: 4px; /* Space between indicator and input in RTL */
+            flex-shrink: 0; /* Prevent indicator from shrinking */
+        }
+
+        /* Specific column widths for better compactness */
+        #attendanceTable th:nth-child(1), #attendanceTable td:nth-child(1) { width: 40px; } /* Serial No. */
+        #attendanceTable th:nth-child(2), #attendanceTable td:nth-child(2) { width: 100px; } /* Student Name - Adjusted */
+        #attendanceTable th:nth-child(3), #attendanceTable td:nth-child(3) { width: 80px; } /* Today's Attendance - Adjusted */
+        #attendanceTable th:nth-child(4), #attendanceTable td:nth-child(4) { width: 80px; } /* Fine/Fee */
+        #attendanceTable th:nth-child(5), #attendanceTable td:nth-child(5) { width: 60px; } /* Actions (Delete) */
+
+        /* Style for "غیر حاضر" option in dropdown */
+        .option-absent-red {
+            color: red;
+        }
+
+        /* Search input specific styling */
+        #searchInput {
+            width: 150px; /* Adjust width for search input */
+            text-align: right;
+        }
+
+        /* Student History Modal Specific Styles */
+        .history-table-container {
+            overflow-x: auto;
+            margin-top: 15px;
+            border: 1px solid #A0AEC0;
+            border-radius: 8px;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif;
+        }
+        .history-table th, .history-table td {
+            border: 1px solid #CBD5E0;
+            padding: 2px; /* Further reduced padding */
+            font-size: 0.6em; /* Even smaller font size */
+            text-align: center;
+        }
+        .history-table th {
+            background-color: #E2E8F0;
+        }
+        /* Specific column widths for history table */
+        .history-table th:nth-child(1), .history-table td:nth-child(1) { width: 60px; } /* Date */
+        .history-table th:nth-child(2), #historyTable td:nth-child(2) { width: 50px; } /* Status */
+        .history-table th:nth-child(3), #historyTable td:nth-child(3) { width: 50px; } /* Fine/Fee */
+
+
+        .history-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .history-controls select, .history-controls input {
+            padding: 4px 6px;
+            font-size: 0.8em;
+            font-family: 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif;
+        }
+        .history-summary {
+            margin-top: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            font-family: 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif;
+        }
+
+        /* New LLM Analysis Modal Styles */
+        #llmAnalysisModal .modal-content {
+            max-width: 600px;
+            text-align: right; /* Align text to right for Urdu content */
+        }
+        #llmAnalysisContent {
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+            text-align: justify; /* Justify text for better readability */
+            font-size: 0.9em;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        /* Monthly Summary Table Styles */
+        .monthly-summary-container {
+            margin-top: 30px;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .monthly-summary-container h3 {
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #336791;
+        }
+        .monthly-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif;
+        }
+        .monthly-summary-table th, .monthly-summary-table td {
+            border: 1px solid #CBD5E0;
+            padding: 5px;
+            text-align: center;
+            font-size: 0.8em;
+        }
+        .monthly-summary-table th {
+            background-color: #E2E8F0;
+        }
+        /* Adjusted column widths for monthly summary table */
+        .monthly-summary-table th:nth-child(1), .monthly-summary-table td:nth-child(1) { width: 18%; } /* مہینہ */
+        .monthly-summary-table th:nth-child(2), .monthly-summary-table td:nth-child(2) { width: 18%; } /* ایام */
+        .monthly-summary-table th:nth-child(3), .monthly-summary-table td:nth-child(3) { width: 22%; } /* حاضریاں */
+        .monthly-summary-table th:nth-child(4), .monthly-summary-table td:nth-child(4) { width: 22%; } /* غیر حاضریاں */
+        .monthly-summary-table th:nth-child(5), .monthly-summary-table td:nth-child(5) { width: 20%; } /* اوسط حاضری */
+
+        /* Styles for Monthly Download Section */
+        .monthly-download-container {
+            margin-top: 30px;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .monthly-download-container h3 {
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #336791;
+        }
+        .monthly-download-container select, .monthly-download-container input {
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E0;
+            margin: 2px;
+            font-family: 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif;
+            font-size: 0.85em;
+            text-align: right;
+        }
+        .monthly-download-container button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+        .monthly-download-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="container mx-auto max-w-7xl">
+        <div class="header-controls">
+            <div>
+                <label for="registerTitle" class="text-sm font-medium text-gray-700">رجسٹر برائے:</label>
+                <input type="text" id="registerTitle" placeholder="مثلاً جماعت پنجم">
+                <button id="loadOrCreateRegisterBtn" class="bg-[#4CAF50] hover:bg-[#45a049] text-white">رجسٹر لوڈ/بنائیں</button>
+            </div>
+            <div>
+                <label for="existingRegistersSelector" class="text-sm font-medium text-gray-700">موجودہ رجسٹرز:</label>
+                <select id="existingRegistersSelector">
+                    <option value="">رجسٹر منتخب کریں</option>
+                </select>
+            </div>
+            <div>
+                <label for="selectedDateInput" class="text-sm font-medium text-gray-700">تاریخ منتخب کریں:</label>
+                <input type="date" id="selectedDateInput">
+            </div>
+            
+            <div class="flex items-center gap-2 mr-4"> <label for="searchInput" class="text-sm font-medium text-gray-700">تلاش کریں:</label>
+                <input type="text" id="searchInput" placeholder="طالب علم کا نام">
+                <button id="searchBtn" class="bg-[#6C757D] hover:bg-[#545b62]">تلاش کریں</button>
+            </div>
+        </div>
+
+        <div id="currentRegisterInfo" class="mt-4 mb-2 text-lg font-semibold text-center"></div>
+        
+        <div class="table-container bg-white p-4 rounded-lg shadow">
+            <table id="attendanceTable" class="min-w-full">
+                <thead>
+                    <tr id="tableHeaderRow">
+                        <th>نمبر شمار</th>
+                        <th>طالب علم کا نام</th>
+                        <th>آج کی حاضری</th> <th>جرمانہ/فیس</th> <th>عمل</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTableBody">
+                    </tbody>
+            </table>
+        </div>
+        <p id="noDataMessage" class="text-center text-gray-500 mt-4" style="display: none;">اس رجسٹر کے لیے کوئی ڈیٹا موجود نہیں۔ طلباء شامل کریں اور حاضری لگائیں۔</p>
+
+
+        <div class="footer-actions text-center mt-6 space-x-2 space-x-reverse">
+            <button id="addStudentBtn" class="bg-[#007BFF] hover:bg-[#0056b3]">طالب علم شامل کریں</button>
+            <button id="saveImageBtn" class="bg-[#17A2B8] hover:bg-[#117a8b]">ایمیج میں محفوظ کریں</button>
+            <button id="totalFinesBtn" class="bg-[#FFC107] hover:bg-[#e0a800] text-black">کل جرمانہ/فیس</button>
+        </div>
+
+        <div class="monthly-summary-container">
+            <h3>ماہانہ حاضری کا خلاصہ</h3>
+            <table class="monthly-summary-table">
+                <thead>
+                    <tr>
+                        <th>مہینہ</th>
+                        <th>ایام</th>
+                        <th>حاضریاں</th>
+                        <th>غیر حاضریاں</th>
+                        <th>اوسط حاضری</th>
+                    </tr>
+                </thead>
+                <tbody id="monthlySummaryTableBody">
+                    </tbody>
+            </table>
+            <p id="noMonthlySummaryMessage" class="text-center text-gray-500 mt-4" style="display: none;">کوئی ماہانہ حاضری کا خلاصہ دستیاب نہیں۔</p>
+        </div>
+
+        <div class="monthly-download-container">
+            <h3>معین مہینے کا ڈیٹا ڈاؤنلوڈ کریں</h3>
+            <div class="flex flex-wrap justify-center items-center gap-4 mb-4">
+                <label for="downloadMonthSelector" class="text-sm font-medium text-gray-700">مہینہ:</label>
+                <select id="downloadMonthSelector"></select>
+                <label for="downloadYearSelector" class="text-sm font-medium text-gray-700">سال:</label>
+                <input type="number" id="downloadYearSelector" value="2025">
+                <button id="downloadMonthlyDataBtn" class="bg-[#007BFF] hover:bg-[#0056b3]">ڈیٹا ڈاؤنلوڈ کریں</button>
+            </div>
+            <p id="noDownloadDataMessage" class="text-center text-gray-500 mt-2" style="display: none;">اس مہینے کے لیے کوئی ڈیٹا دستیاب نہیں۔</p>
+        </div>
+    </div>
+
+    <div id="loadingModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="loading-spinner"></div>
+            <p>برائے مہربانی انتظار کریں...</p>
+        </div>
+    </div>
+    
+    <div id="messageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="messageText"></p>
+            <button onclick="closeMessageModal()" class="mt-4 bg-gray-300 hover:bg-gray-400 text-black">ٹھیک ہے</button>
+        </div>
+    </div>
+
+    <div id="addStudentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3 class="text-xl font-semibold mb-4">نئے طالب علم کا نام درج کریں</h3>
+            <input type="text" id="newStudentNameInput" placeholder="طالب علم کا نام" class="w-full p-2 border rounded mb-4 text-right" dir="rtl">
+            <button id="confirmAddStudentBtn" class="bg-[#4CAF50] hover:bg-[#45a049] text-white mr-2">شامل کریں</button>
+            <button id="cancelAddStudentBtn" class="bg-gray-300 hover:bg-gray-400 text-black">منسوخ کریں</button>
+        </div>
+    </div>
+
+    <div id="studentHistoryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3 class="text-xl font-semibold mb-4">طالب علم کی حاضری کا ریکارڈ</h3>
+            <p id="historyStudentName" class="text-lg font-bold mb-2"></p>
+            
+            <div class="history-controls">
+                <label for="historyMonthSelector" class="text-sm font-medium text-gray-700">مہینہ:</label>
+                <select id="historyMonthSelector"></select>
+                <label for="historyYearSelector" class="text-sm font-medium text-gray-700">سال:</label>
+                <input type="number" id="historyYearSelector" value="2025">
+            </div>
+
+            <div class="history-table-container">
+                <table id="historyTable" class="history-table">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>حالت</th>
+                            <th>جرمانہ/فیس</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        </tbody>
+                </table>
+            </div>
+            <div id="historySummary" class="history-summary">
+                </div>
+            <p id="noHistoryMessage" class="text-center text-gray-500 mt-4" style="display: none;">اس مدت کے لیے کوئی حاضری ریکارڈ نہیں ملا۔</p>
+
+            <div class="flex justify-center mt-4 space-x-2 space-x-reverse">
+                <button id="analyzePerformanceBtn" class="bg-[#8A2BE2] hover:bg-[#6A0DAD] text-white">طالب علم کی کارکردگی کا تجزیہ ✨</button>
+                <button id="shareHistoryImageBtn" class="bg-[#17A2B8] hover:bg-[#117a8b]">ایمیج شئیر کریں</button>
+                <button onclick="closeStudentHistoryModal()" class="bg-gray-300 hover:bg-gray-400 text-black">بند کریں</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="llmAnalysisModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3 class="text-xl font-semibold mb-4">طالب علم کی کارکردگی کا تجزیہ</h3>
+            <p id="llmAnalysisContent" class="text-gray-800"></p>
+            <button onclick="closeLLMAnalysisModal()" class="mt-4 bg-gray-300 hover:bg-gray-400 text-black">ٹھیک ہے</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Global state variables
+        let students = []; // Array to hold student objects
+        let currentRegisterId = null; // Unique ID for the current register (e.g., "class_fifth")
+        let currentRegisterData = null; // Object to store the entire register data
+        let allRegistersList = []; // Array to store { id, title } of all registers
+
+        // Variables for history modal context
+        let currentHistoryStudentId = null;
+
+        const urduMonths = [
+            "جنوری", "فروری", "مارچ", "اپریل", "مئی", "جون",
+            "جولائی", "اگست", "ستمبر", "اکتوبر", "نومبر", "دسمبر"
+        ];
+        // Attendance options with full words as keys and abbreviations as values (for display/summary)
+        const attendanceOptions = {
+            "": " - ", // Empty
+            "حاضر": "حاضر", // Present
+            "غیر حاضر": "غیر حاضر", // Absent
+            "رخصت": "رخصت"  // Leave
+        };
+        // Abbreviations for display in table cells if needed, but for totals, full words are used.
+        const attendanceAbbreviations = {
+            "": " - ",
+            "حاضر": "ح",
+            "غیر حاضر": "غ",
+            "رخصت": "ر"
+        };
+
+
+        // DOM Elements
+        const registerTitleInput = document.getElementById('registerTitle');
+        const existingRegistersSelector = document.getElementById('existingRegistersSelector'); // New selector
+        const selectedDateInput = document.getElementById('selectedDateInput'); // New date input
+        const loadOrCreateRegisterBtn = document.getElementById('loadOrCreateRegisterBtn'); // Renamed from loadRegisterBtn
+        const attendanceTableBody = document.getElementById('attendanceTableBody');
+        const tableHeaderRow = document.getElementById('tableHeaderRow'); // This will be static now
+        const addStudentBtn = document.getElementById('addStudentBtn');
+        const saveImageBtn = document.getElementById('saveImageBtn'); // Reverted to saveImageBtn
+        const totalFinesBtn = document.getElementById('totalFinesBtn'); // New total fines button
+        const currentRegisterInfo = document.getElementById('currentRegisterInfo');
+        const noDataMessage = document.getElementById('noDataMessage');
+        const loadingModal = document.getElementById('loadingModal');
+        const messageModal = document.getElementById('messageModal');
+        const messageText = document.getElementById('messageText');
+
+        // Elements for Add Student Modal
+        const addStudentModal = document.getElementById('addStudentModal');
+        const newStudentNameInput = document.getElementById('newStudentNameInput');
+        const confirmAddStudentBtn = document.getElementById('confirmAddStudentBtn');
+        const cancelAddStudentBtn = document.getElementById('cancelAddStudentBtn');
+
+        // Search Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+
+        // Student History Modal Elements
+        const studentHistoryModal = document.getElementById('studentHistoryModal');
+        const historyStudentName = document.getElementById('historyStudentName');
+        const historyMonthSelector = document.getElementById('historyMonthSelector');
+        const historyYearSelector = document.getElementById('historyYearSelector');
+        const historyTableBody = document.getElementById('historyTableBody');
+        const historySummary = document.getElementById('historySummary');
+        const noHistoryMessage = document.getElementById('noHistoryMessage');
+        const shareHistoryImageBtn = document.getElementById('shareHistoryImageBtn');
+        const analyzePerformanceBtn = document.getElementById('analyzePerformanceBtn'); // New LLM button
+
+        // LLM Analysis Modal Elements
+        const llmAnalysisModal = document.getElementById('llmAnalysisModal');
+        const llmAnalysisContent = document.getElementById('llmAnalysisContent');
+
+        // Monthly Summary Table Elements
+        const monthlySummaryTableBody = document.getElementById('monthlySummaryTableBody');
+        const noMonthlySummaryMessage = document.getElementById('noMonthlySummaryMessage');
+
+        // Monthly Download Elements
+        const downloadMonthSelector = document.getElementById('downloadMonthSelector');
+        const downloadYearSelector = document.getElementById('downloadYearSelector');
+        const downloadMonthlyDataBtn = document.getElementById('downloadMonthlyDataBtn');
+        const noDownloadDataMessage = document.getElementById('noDownloadDataMessage');
+
+
+        // --- Utility Functions ---
+        /**
+         * Shows or hides the loading modal.
+         * @param {boolean} show - True to show, false to hide.
+         */
+        function showLoading(show) {
+            loadingModal.style.display = show ? 'flex' : 'none';
+        }
+
+        /**
+         * Displays a custom message modal.
+         * @param {string} message - The message to display.
+         */
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageModal.style.display = 'flex';
+        }
+        
+        /**
+         * Closes the custom message modal.
+         */
+        window.closeMessageModal = function() { // Make it global for inline onclick
+            messageModal.style.display = 'none';
+        }
+
+        /**
+         * Closes the student history modal.
+         */
+        window.closeStudentHistoryModal = function() {
+            studentHistoryModal.style.display = 'none';
+        }
+
+        /**
+         * Closes the LLM analysis modal.
+         */
+        window.closeLLMAnalysisModal = function() {
+            llmAnalysisModal.style.display = 'none';
+        }
+
+        /**
+         * Sanitizes a string to be used as a part of a local storage key or ID.
+         * Replaces non-alphanumeric characters with underscores.
+         * @param {string} text - The input string.
+         * @returns {string} The sanitized string.
+         */
+        function sanitizeForId(text) {
+            if (!text) return 'untitled';
+            return text.replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
+        }
+
+        /**
+         * Formats a Date object into a YYYY-MM-DD string.
+         * @param {Date} date - The date object.
+         * @returns {string} The formatted date string.
+         */
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        /**
+         * Formats a YYYY-MM-DD date string into a readable Urdu format.
+         * @param {string} dateString - The date string (YYYY-MM-DD).
+         * @returns {string} The formatted Urdu date string.
+         */
+        function formatUrduDate(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            return `${day} ${urduMonths[month - 1]} ${year}`;
+        }
+
+        // --- Local Storage Functions ---
+        const LOCAL_STORAGE_KEY_PREFIX = 'attendance_register_'; // Prefix for local storage keys
+        const ALL_REGISTERS_KEY = 'attendance_all_registers_list'; // Key for the list of all registers
+
+        /**
+         * Loads register data from local storage based on the current register ID.
+         * @param {string} registerId - The ID of the register to load.
+         * @returns {object|null} The loaded register data, or null if not found.
+         */
+        function loadRegisterFromLocalStorageById(registerId) {
+            try {
+                const data = localStorage.getItem(LOCAL_STORAGE_KEY_PREFIX + registerId);
+                return data ? JSON.parse(data) : null;
+            } catch (e) {
+                console.error("Error loading register by ID from localStorage:", e);
+                return null;
+            }
+        }
+
+        /**
+         * Loads the list of all register metadata from local storage.
+         */
+        function loadAllRegistersList() {
+            try {
+                const data = localStorage.getItem(ALL_REGISTERS_KEY);
+                allRegistersList = data ? JSON.parse(data) : [];
+            } catch (e) {
+                console.error("Error loading all registers list from localStorage:", e);
+                allRegistersList = [];
+            }
+        }
+
+        /**
+         * Saves the current register data to local storage.
+         */
+        function saveRegisterToLocalStorage() {
+            if (!currentRegisterId || !currentRegisterData) {
+                console.warn("No active register to save or data is missing.");
+                return;
+            }
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY_PREFIX + currentRegisterId, JSON.stringify(currentRegisterData));
+                console.log("Data saved to localStorage for register:", currentRegisterId);
+                renderMonthlySummaryTable(); // Update monthly summary after saving
+            } catch (e) {
+                console.error("Error saving to localStorage:", e);
+                showMessage("ڈیٹا محفوظ کرنے میں خرابی: " + e.message);
+            }
+        }
+
+        /**
+         * Saves the list of all register metadata to local storage.
+         */
+        function saveAllRegistersList() {
+            try {
+                localStorage.setItem(ALL_REGISTERS_KEY, JSON.stringify(allRegistersList));
+            } catch (e) {
+                console.error("Error saving all registers list to localStorage:", e);
+                showMessage("تمام رجسٹرز کی فہرست محفوظ کرنے میں خرابی: " + e.message);
+            }
+        }
+
+
+        // --- UI Rendering ---
+        /**
+         * Calculates total present, absent, and total days for a student.
+         * @param {object} student - The student object.
+         * @returns {object} An object with totalPresent, totalAbsent, totalLeave, totalDays.
+         */
+        function calculateAttendanceTotals(student) {
+            let totalPresent = 0;
+            let totalAbsent = 0;
+            let totalLeave = 0; // Include leave in history summary
+            let totalDays = 0; // New: counts days attendance was marked
+
+            for (const date in student.attendance) {
+                const status = student.attendance[date];
+                if (status === "حاضر") {
+                    totalPresent++;
+                } else if (status === "غیر حاضر") {
+                    totalAbsent++;
+                } else if (status === "رخصت") {
+                    totalLeave++;
+                }
+                // Only count a day if attendance was explicitly marked (not empty string)
+                if (status !== "") {
+                    totalDays++;
+                }
+            }
+            return { totalPresent, totalAbsent, totalLeave, totalDays };
+        }
+
+        /**
+         * Renders the attendance table based on the current students data.
+         */
+        function renderTable() {
+            if (!currentRegisterId) {
+                attendanceTableBody.innerHTML = '';
+                noDataMessage.style.display = 'block';
+                currentRegisterInfo.textContent = '';
+                monthlySummaryTableBody.innerHTML = ''; // Clear monthly summary
+                noMonthlySummaryMessage.style.display = 'block';
+                return;
+            }
+            noDataMessage.style.display = 'none';
+
+            const selectedDateStr = selectedDateInput.value; // YYYY-MM-DD
+            let previousDayDateStr = null;
+            if (selectedDateStr) {
+                const selectedDate = new Date(selectedDateStr);
+                const previousDay = new Date(selectedDate);
+                previousDay.setDate(selectedDate.getDate() - 1);
+                previousDayDateStr = formatDate(previousDay); // Get YYYY-MM-DD for previous day
+            }
+
+            // Render table body
+            attendanceTableBody.innerHTML = ''; // Clear previous rows
+            students.forEach((student, index) => {
+                const tr = document.createElement('tr');
+                tr.dataset.studentId = student.id;
+
+                // Serial Number Column
+                const tdSerialNo = document.createElement('td');
+                tdSerialNo.textContent = index + 1;
+                tr.appendChild(tdSerialNo);
+
+                // Student Name Column
+                const tdName = document.createElement('td');
+                // Use a container for the indicator and input to manage their layout
+                const nameContainer = document.createElement('div');
+                nameContainer.className = 'student-name-container'; // Apply flex styles here
+
+                // Check for previous day's absence and add indicator
+                if (previousDayDateStr && student.attendance[previousDayDateStr] === "غیر حاضر") {
+                    const absentIndicator = document.createElement('span');
+                    absentIndicator.innerHTML = '&#x25CF;'; // Red circle symbol
+                    absentIndicator.title = `گزشتہ دن (${formatUrduDate(previousDayDateStr)}) غیر حاضر تھا`;
+                    absentIndicator.className = 'absent-indicator'; // Custom class for styling
+                    nameContainer.appendChild(absentIndicator); // Append first for left alignment in RTL
+                }
+
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.value = student.name;
+                nameInput.className = 'p-1 border rounded student-name-input';
+                nameInput.placeholder = 'طالب علم کا نام';
+                nameInput.dir = 'rtl'; // Set direction for Urdu input
+                nameInput.onchange = (e) => handleStudentNameChange(student.id, e.target.value);
+                nameContainer.appendChild(nameInput);
+                
+                tdName.appendChild(nameContainer);
+                tr.appendChild(tdName);
+
+                // Today's Attendance Column (Select dropdown)
+                const tdTodayAttendance = document.createElement('td');
+                const attendanceSelect = document.createElement('select');
+                attendanceSelect.className = 'attendance-select-dropdown'; // Use the new class
+                attendanceSelect.dir = 'rtl'; // Set direction for Urdu
+
+                // Add options to the select dropdown
+                for (const statusKey in attendanceOptions) {
+                    const option = document.createElement('option');
+                    option.value = statusKey;
+                    option.textContent = attendanceOptions[statusKey];
+                    if (statusKey === "غیر حاضر") {
+                        option.classList.add('option-absent-red'); // Add class for red text
+                    }
+                    attendanceSelect.appendChild(option);
+                }
+
+                // Set the current value for the selected date
+                attendanceSelect.value = student.attendance[selectedDateStr] || "";
+                
+                // Add event listener for change
+                attendanceSelect.addEventListener('change', (e) => {
+                    handleAttendanceChange(student.id, selectedDateStr, e.target.value);
+                });
+                tdTodayAttendance.appendChild(attendanceSelect);
+                tr.appendChild(tdTodayAttendance);
+
+                // Fine/Fee Column
+                const tdFineFee = document.createElement('td');
+                const fineFeeInput = document.createElement('input');
+                fineFeeInput.type = 'text'; // Can be 'number' if only numbers are expected
+                fineFeeInput.value = student.fines ? (student.fines[selectedDateStr] || '') : '';
+                fineFeeInput.className = 'w-full p-1 border rounded text-right';
+                fineFeeInput.placeholder = 'رقم';
+                fineFeeInput.dir = 'rtl';
+                fineFeeInput.onchange = (e) => handleFineFeeChange(student.id, selectedDateStr, e.target.value);
+                tdFineFee.appendChild(fineFeeInput);
+                tr.appendChild(tdFineFee);
+                
+                // Actions Column (Delete Student)
+                const tdActions = document.createElement('td');
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'حذف کریں';
+                deleteBtn.className = 'bg-red-500 hover:bg-red-700 text-white text-xs p-1 rounded';
+                deleteBtn.onclick = () => handleDeleteStudent(student.id);
+                tdActions.appendChild(deleteBtn);
+                tr.appendChild(tdActions);
+
+                attendanceTableBody.appendChild(tr);
+            });
+            
+            if(students.length === 0 && currentRegisterId){
+                 noDataMessage.style.display = 'block';
+                 noDataMessage.textContent = 'کوئی طالب علم موجود نہیں۔ براہ کرم "طالب علم شامل کریں" بٹن استعمال کریں۔';
+            } else {
+                 noDataMessage.style.display = 'none';
+            }
+
+            currentRegisterInfo.textContent = `رجسٹر: ${registerTitleInput.value || 'N/A'}`;
+            renderMonthlySummaryTable(); // Call to render monthly summary
+        }
+
+        /**
+         * Populates the month selector dropdown for history modal with Urdu month names.
+         */
+        function populateHistoryMonthSelector() {
+            historyMonthSelector.innerHTML = ''; // Clear existing options
+            urduMonths.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index; // 0-indexed
+                option.textContent = urduMonths[index];
+                historyMonthSelector.appendChild(option);
+            });
+            historyMonthSelector.value = new Date().getMonth(); // Default to current month
+        }
+
+        /**
+         * Renders the student's attendance history in the modal.
+         * @param {string} studentId - The ID of the student.
+         * @param {number} month - The 0-indexed month to filter history.
+         * @param {number} year - The year to filter history.
+         */
+        function renderStudentHistory(studentId, month, year) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) {
+                historyTableBody.innerHTML = '<tr><td colspan="3">طالب علم نہیں ملا۔</td></tr>'; // Adjusted colspan
+                historySummary.textContent = '';
+                noHistoryMessage.style.display = 'block';
+                return;
+            }
+
+            historyStudentName.textContent = `طالب علم: ${student.name}`;
+            historyTableBody.innerHTML = '';
+            noHistoryMessage.style.display = 'none';
+
+            let filteredAttendance = {};
+            let historyTotalPresent = 0;
+            let historyTotalAbsent = 0;
+            let historyTotalLeave = 0; // For history summary
+            let historyTotalDays = 0;
+            let historyTotalFine = 0; // New: for fine/fee total
+
+            // Filter attendance and fines by selected month and year
+            for (const dateString in student.attendance) {
+                const date = new Date(dateString);
+                if (date.getFullYear() === year && date.getMonth() === month) {
+                    filteredAttendance[dateString] = student.attendance[dateString];
+                }
+            }
+
+            const sortedDates = Object.keys(filteredAttendance).sort();
+
+            if (sortedDates.length === 0) {
+                noHistoryMessage.style.display = 'block';
+                historySummary.textContent = '';
+                return;
+            }
+
+            sortedDates.forEach(dateString => {
+                const status = filteredAttendance[dateString];
+                const fine = student.fines ? (student.fines[dateString] || '') : ''; // Get fine for this date
+                
+                const tr = document.createElement('tr');
+                const tdDate = document.createElement('td');
+                tdDate.textContent = formatUrduDate(dateString);
+                const tdStatus = document.createElement('td');
+                tdStatus.textContent = attendanceOptions[status];
+                const tdFine = document.createElement('td');
+                tdFine.textContent = fine;
+                
+                tr.appendChild(tdDate);
+                tr.appendChild(tdStatus);
+                tr.appendChild(tdFine); // Append fine column
+                historyTableBody.appendChild(tr);
+
+                // Update history totals
+                if (status === "حاضر") {
+                    historyTotalPresent++;
+                } else if (status === "غیر حاضر") {
+                    historyTotalAbsent++;
+                } else if (status === "رخصت") {
+                    historyTotalLeave++;
+                }
+                if (status !== "") { // Count only if attendance was marked
+                    historyTotalDays++;
+                }
+                // Add fine to total if it's a valid number
+                const fineValue = parseFloat(fine);
+                if (!isNaN(fineValue)) {
+                    historyTotalFine += fineValue;
+                }
+            });
+
+            historySummary.textContent = `کل ایام: ${historyTotalDays} | حاضر: ${historyTotalPresent} | غیر حاضر: ${historyTotalAbsent} | رخصت: ${historyTotalLeave} | کل جرمانہ/فیس: ${historyTotalFine}`;
+        }
+
+        /**
+         * Populates the existing registers selector dropdown.
+         */
+        function populateRegisterSelector() {
+            existingRegistersSelector.innerHTML = '<option value="">رجسٹر منتخب کریں</option>'; // Clear and add default
+            allRegistersList.forEach(reg => {
+                const option = document.createElement('option');
+                option.value = reg.id;
+                option.textContent = reg.title;
+                existingRegistersSelector.appendChild(option);
+            });
+            // Set the selector to the currently loaded register if any
+            if (currentRegisterId) {
+                existingRegistersSelector.value = currentRegisterId;
+            } else {
+                existingRegistersSelector.value = "";
+            }
+        }
+
+
+        // --- Monthly Summary Logic ---
+        /**
+         * Calculates monthly attendance summary for all students in the current register.
+         * @returns {object} An object where keys are "YYYY-MM" and values are { totalDays, totalPresent, totalAbsent, totalLeave, totalStudentsMarked }.
+         */
+        function calculateMonthlySummary() {
+            const monthlyData = {};
+
+            if (!currentRegisterData || !currentRegisterData.students) {
+                return {};
+            }
+
+            currentRegisterData.students.forEach(student => {
+                for (const dateString in student.attendance) {
+                    const date = new Date(dateString);
+                    const yearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                    const status = student.attendance[dateString];
+
+                    if (!monthlyData[yearMonth]) {
+                        monthlyData[yearMonth] = {
+                            totalDays: 0, // Total days any student's attendance was marked in this month
+                            totalPresent: 0,
+                            totalAbsent: 0,
+                            markedStudentsPerDay: {} // To count unique students marked per day
+                        };
+                    }
+
+                    // Increment counts based on status
+                    if (status === "حاضر") {
+                        monthlyData[yearMonth].totalPresent++;
+                    } else if (status === "غیر حاضر") {
+                        monthlyData[yearMonth].totalAbsent++;
+                    }
+                    
+                    // Count total days attendance was marked for at least one student
+                    if (status !== "") {
+                        if (!monthlyData[yearMonth].markedStudentsPerDay[dateString]) {
+                            monthlyData[yearMonth].markedStudentsPerDay[dateString] = new Set();
+                        }
+                        monthlyData[yearMonth].markedStudentsPerDay[dateString].add(student.id);
+                    }
+                }
+            });
+
+            // Calculate actual totalDays for each month based on unique days where at least one student was marked
+            for (const yearMonth in monthlyData) {
+                monthlyData[yearMonth].totalDays = Object.keys(monthlyData[yearMonth].markedStudentsPerDay).length;
+                delete monthlyData[yearMonth].markedStudentsPerDay; // Clean up helper property
+            }
+
+            return monthlyData;
+        }
+
+        /**
+         * Renders the monthly summary table based on calculated data.
+         */
+        function renderMonthlySummaryTable() {
+            const summaryData = calculateMonthlySummary();
+            monthlySummaryTableBody.innerHTML = '';
+
+            const sortedMonths = Object.keys(summaryData).sort();
+
+            if (sortedMonths.length === 0) {
+                noMonthlySummaryMessage.style.display = 'block';
+                return;
+            } else {
+                noMonthlySummaryMessage.style.display = 'none';
+            }
+
+            sortedMonths.forEach(yearMonth => {
+                const data = summaryData[yearMonth];
+                const [year, monthIndex] = yearMonth.split('-').map(Number);
+                const monthName = urduMonths[monthIndex - 1]; // Convert 1-indexed month to 0-indexed for array
+
+                const totalMarkedDays = data.totalDays; // This is the count of days attendance was marked for *any* student
+                
+                // Calculate average attendance for the month
+                let averageAttendance = 0;
+                if (totalMarkedDays > 0) {
+                    // Average attendance is total present / (total present + total absent)
+                    const totalAttendanceEntries = data.totalPresent + data.totalAbsent; 
+                    if (totalAttendanceEntries > 0) {
+                        averageAttendance = (data.totalPresent / totalAttendanceEntries) * 100;
+                    }
+                }
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${monthName} ${year}</td>
+                    <td>${totalMarkedDays}</td>
+                    <td>${data.totalPresent}</td>
+                    <td>${data.totalAbsent}</td>
+                    <td>${averageAttendance.toFixed(2)}%</td>
+                `;
+                monthlySummaryTableBody.appendChild(tr);
+            });
+        }
+
+        // --- Monthly Data Download Logic ---
+        /**
+         * Populates the month and year selectors for the monthly data download section.
+         */
+        function populateDownloadSelectors() {
+            downloadMonthSelector.innerHTML = '';
+            urduMonths.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index; // 0-indexed
+                option.textContent = urduMonths[index];
+                downloadMonthSelector.appendChild(option);
+            });
+            downloadMonthSelector.value = new Date().getMonth(); // Default to current month
+
+            // Populate years (e.g., current year +/- 5 years)
+            const currentYear = new Date().getFullYear();
+            downloadYearSelector.innerHTML = '';
+            for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                downloadYearSelector.appendChild(option);
+            }
+            downloadYearSelector.value = currentYear;
+        }
+
+        /**
+         * Downloads the monthly attendance and fine data as a CSV file.
+         */
+        async function downloadMonthlyData() {
+            if (!currentRegisterData || students.length === 0) {
+                showMessage("ڈاؤنلوڈ کرنے کے لیے کوئی رجسٹر یا طالب علم موجود نہیں۔");
+                return;
+            }
+
+            showLoading(true);
+
+            const selectedMonth = parseInt(downloadMonthSelector.value);
+            const selectedYear = parseInt(downloadYearSelector.value);
+
+            let csvContent = "طالب علم کا نام,تاریخ,حاضری,جرمانہ/فیس\n"; // CSV header with Urdu
+            let hasData = false;
+
+            students.forEach(student => {
+                // Collect all dates for the selected month/year where this student has an entry
+                const datesInMonth = Object.keys(student.attendance).filter(dateString => {
+                    const date = new Date(dateString);
+                    return date.getFullYear() === selectedYear && date.getMonth() === selectedMonth;
+                }).sort();
+
+                datesInMonth.forEach(dateString => {
+                    hasData = true;
+                    const status = student.attendance[dateString] || "";
+                    const fine = student.fines[dateString] || "";
+                    csvContent += `"${student.name}","${formatUrduDate(dateString)}","${attendanceOptions[status]}","${fine}"\n`;
+                });
+            });
+
+            if (!hasData) {
+                showMessage("منتخب مہینے کے لیے کوئی ڈیٹا دستیاب نہیں۔");
+                noDownloadDataMessage.style.display = 'block';
+                showLoading(false);
+                return;
+            } else {
+                noDownloadDataMessage.style.display = 'none';
+            }
+
+            // Create a Blob with UTF-8 BOM for proper Urdu character display in Excel
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `حاضری_ڈیٹا_${urduMonths[selectedMonth]}_${selectedYear}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href); // Clean up
+            
+            showMessage("ڈیٹا کامیابی سے ڈاؤنلوڈ ہو گیا۔");
+            showLoading(false);
+        }
+
+
+        // --- Event Handlers & Data Logic ---
+        /**
+         * Loads an existing register or creates a new one based on user input in registerTitleInput.
+         */
+        async function loadOrCreateRegister() {
+            const title = registerTitleInput.value.trim();
+            if (!title) {
+                showMessage("براہ کرم 'رجسٹر برائے' کا عنوان درج کریں۔");
+                return;
+            }
+
+            showLoading(true);
+            const sanitizedTitle = sanitizeForId(title);
+            const potentialRegisterId = `register_${sanitizedTitle}`;
+
+            let loadedData = loadRegisterFromLocalStorageById(potentialRegisterId);
+
+            if (loadedData) {
+                currentRegisterData = loadedData;
+                students = currentRegisterData.students || [];
+                // Ensure fines object exists for older data
+                students.forEach(s => { if (!s.fines) s.fines = {}; });
+                registerTitleInput.value = currentRegisterData.originalRegisterTitle || title;
+                currentRegisterId = potentialRegisterId; // Ensure currentRegisterId is set
+                console.log("Register loaded from localStorage:", currentRegisterData);
+                showMessage("رجسٹر کامیابی سے لوڈ ہو گیا۔");
+            } else {
+                // Create new register data structure
+                students = [];
+                currentRegisterId = potentialRegisterId;
+                currentRegisterData = {
+                    id: currentRegisterId,
+                    originalRegisterTitle: title,
+                    students: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                saveRegisterToLocalStorage(); // Save the newly created register
+
+                // Add to allRegistersList if not already present
+                if (!allRegistersList.some(reg => reg.id === currentRegisterId)) {
+                    allRegistersList.push({ id: currentRegisterId, title: title });
+                    saveAllRegistersList();
+                }
+                console.log("New register created and saved to localStorage:", currentRegisterId);
+                showMessage("نیا رجسٹر کامیابی سے بنا دیا گیا۔");
+            }
+            
+            saveRegisterToLocalStorage(); // Ensure consistency after load/create
+            renderTable();
+            populateRegisterSelector(); // Update selector after load/create
+            populateDownloadSelectors(); // Update download selectors
+            showLoading(false);
+        }
+
+        /**
+         * Handles loading a register selected from the dropdown.
+         */
+        async function handleLoadSelectedRegister() {
+            const selectedId = existingRegistersSelector.value;
+            if (!selectedId) {
+                // If "رجسٹر منتخب کریں" is selected, clear current register view
+                currentRegisterId = null;
+                currentRegisterData = null;
+                students = [];
+                registerTitleInput.value = ""; // Clear the input field
+                renderTable();
+                currentRegisterInfo.textContent = '';
+                noDataMessage.style.display = 'block';
+                noDataMessage.textContent = 'براہ کرم ایک رجسٹر لوڈ/بنائیں یا موجودہ رجسٹرز سے منتخب کریں۔';
+                monthlySummaryTableBody.innerHTML = ''; // Clear monthly summary
+                noMonthlySummaryMessage.style.display = 'block';
+                populateDownloadSelectors(); // Update download selectors
+                noDownloadDataMessage.style.display = 'block'; // Hide download message
+                return;
+            }
+
+            showLoading(true);
+            let loadedData = loadRegisterFromLocalStorageById(selectedId);
+            
+            if (loadedData) {
+                currentRegisterData = loadedData;
+                students = currentRegisterData.students || [];
+                // Ensure fines object exists for older data
+                students.forEach(s => { if (!s.fines) s.fines = {}; });
+                currentRegisterId = selectedId;
+                registerTitleInput.value = loadedData.originalRegisterTitle; // Set input field to loaded title
+                showMessage(`منتخب رجسٹر کامیابی سے لوڈ ہو گیا۔`);
+            } else {
+                // This case should ideally not happen if allRegistersList is consistent
+                showMessage("منتخب رجسٹر نہیں ملا۔");
+                // Optionally, remove from allRegistersList if it's a stale entry
+                allRegistersList = allRegistersList.filter(reg => reg.id !== selectedId);
+                saveAllRegistersList();
+                populateRegisterSelector();
+            }
+            
+            saveRegisterToLocalStorage(); // Ensure consistency after load
+            renderTable();
+            populateDownloadSelectors(); // Update download selectors
+            showLoading(false);
+        }
+
+
+        /**
+         * Handles adding a new student using a custom modal.
+         */
+        function handleAddStudent() {
+            if (!currentRegisterId) {
+                showMessage("براہ کرم پہلے رجسٹر لوڈ/بنائیں پھر طالب علم شامل کریں۔");
+                return;
+            }
+            newStudentNameInput.value = ''; // Clear previous input
+            addStudentModal.style.display = 'flex'; // Show the modal
+            newStudentNameInput.focus(); // Focus on the input field
+        }
+
+        /**
+         * Confirms adding a student from the modal input.
+         */
+        confirmAddStudentBtn.addEventListener('click', async () => {
+            const newStudentName = newStudentNameInput.value.trim();
+            if (newStudentName) {
+                const newStudent = {
+                    id: crypto.randomUUID(), // Generate a unique ID for the student
+                    name: newStudentName,
+                    attendance: {}, // Empty attendance initially, keyed by date strings
+                    fines: {} // New: Empty fines object
+                };
+                students.push(newStudent);
+                currentRegisterData.students = students; // Update the main data object
+                renderTable(); // Re-render to show the new student and update totals
+                saveRegisterToLocalStorage(); // Save changes to local storage
+                addStudentModal.style.display = 'none'; // Hide the modal
+                showMessage("طالب علم کامیابی سے شامل کر دیا گیا۔");
+            } else {
+                showMessage("طالب علم کا نام خالی نہیں ہو سکتا۔");
+            }
+        });
+
+        /**
+         * Cancels adding a student and hides the modal.
+         */
+        cancelAddStudentBtn.addEventListener('click', () => {
+            addStudentModal.style.display = 'none'; // Hide the modal
+        });
+        
+        /**
+         * Deletes a student from the current register.
+         * @param {string} studentId - The ID of the student to delete.
+         */
+        async function handleDeleteStudent(studentId) {
+            // Using a custom modal for confirmation instead of `confirm()`
+            const confirmDelete = await new Promise(resolve => {
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <p>کیا آپ واقعی اس طالب علم کو حذف کرنا چاہتے ہیں؟</p>
+                        <button id="confirmYes" class="mt-4 bg-red-500 hover:bg-red-700 text-white mr-2">ہاں</button>
+                        <button id="confirmNo" class="mt-4 bg-gray-300 hover:bg-gray-400 text-black">نہیں</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                document.getElementById('confirmYes').onclick = () => { modal.remove(); resolve(true); };
+                document.getElementById('confirmNo').onclick = () => { modal.remove(); resolve(false); };
+            });
+
+            if (!confirmDelete) return;
+
+            students = students.filter(s => s.id !== studentId);
+            currentRegisterData.students = students; // Update the main data object
+            renderTable(); // Re-render to reflect deletion
+            saveRegisterToLocalStorage(); // Save changes
+            showMessage("طالب علم کامیابی سے حذف کر دیا گیا۔");
+        }
+
+        /**
+         * Handles changes to a student's name.
+         * @param {string} studentId - The ID of the student.
+         * @param {string} newName - The new name for the student.
+         */
+        async function handleStudentNameChange(studentId, newName) {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                student.name = newName.trim();
+                currentRegisterData.students = students; // Update the main data object
+                saveRegisterToLocalStorage(); // Save changes
+            }
+        }
+
+        /**
+         * Handles changes to a student's attendance for a specific date.
+         * This function is now called directly from the select dropdown in the main table.
+         * @param {string} studentId - The ID of the student whose attendance is being changed.
+         * @param {string} dateString - The date in YYYY-MM-DD format for which attendance is being changed.
+         * @param {string} newStatus - The new attendance status (full word: "حاضر", "غیر حاضر", "رخصت", or "").
+         */
+        async function handleAttendanceChange(studentId, dateString, newStatus) {
+            const studentIndex = students.findIndex(s => s.id === studentId);
+            if (studentIndex > -1) {
+                if (!students[studentIndex].attendance) {
+                    students[studentIndex].attendance = {};
+                }
+                students[studentIndex].attendance[dateString] = newStatus;
+                currentRegisterData.students = students; // Update the main data object
+                renderTable(); // Re-render the table to reflect the change and update totals
+                saveRegisterToLocalStorage(); // Save changes to local storage
+                // No showMessage here as it can be frequent and annoying.
+            } else {
+                console.error("Student not found for attendance update:", studentId);
+                showMessage("طالب علم نہیں ملا۔");
+            }
+        }
+
+        /**
+         * Handles changes to a student's fine/fee for a specific date.
+         * @param {string} studentId - The ID of the student.
+         * @param {string} dateString - The date in YYYY-MM-DD format.
+         * @param {string} newFineFee - The new fine/fee value.
+         */
+        async function handleFineFeeChange(studentId, dateString, newFineFee) {
+            const studentIndex = students.findIndex(s => s.id === studentId);
+            if (studentIndex > -1) {
+                if (!students[studentIndex].fines) {
+                    students[studentIndex].fines = {};
+                }
+                students[studentIndex].fines[dateString] = newFineFee.trim(); // Store as string
+                currentRegisterData.students = students;
+                saveRegisterToLocalStorage(); // Save changes to local storage
+                // No need to re-render the whole table, just update the value
+                // The input field itself will reflect the change.
+            } else {
+                console.error("Student not found for fine/fee update:", studentId);
+            }
+        }
+
+
+        /**
+         * Generates and saves the attendance table as an image (PNG).
+         */
+        async function saveImage() { // Reverted function name
+            if (students.length === 0) {
+                showMessage("ایمیج بنانے کے لیے کوئی طالب علم موجود نہیں۔");
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const tableContainer = document.querySelector('.table-container');
+                // Temporarily adjust table width to ensure all content fits for capture
+                const originalMinWidth = tableContainer.style.minWidth;
+                tableContainer.style.minWidth = 'fit-content'; // Or a large fixed value if 'fit-content' isn't enough
+
+                const canvas = await html2canvas(tableContainer, {
+                    scale: 2, // Increase scale for better resolution
+                    useCORS: true, // If any external images were used (not in this case, but good practice)
+                    scrollX: 0, // Prevent horizontal scrolling issues
+                    scrollY: 0, // Prevent vertical scrolling issues
+                    windowWidth: document.documentElement.offsetWidth,
+                    windowHeight: document.documentElement.offsetHeight
+                });
+
+                // Restore original min-width
+                tableContainer.style.minWidth = originalMinWidth;
+
+                const link = document.createElement('a');
+                link.download = `حاضری_رجسٹر_${registerTitleInput.value}_${formatDate(new Date())}.png`;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage("ایمیج کامیابی سے تیار ہو گئی۔");
+            } catch (error) {
+                console.error("Error saving image:", error);
+                showMessage("ایمیج محفوظ کرنے میں خرابی پیش آئی: " + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        /**
+         * Calculates and displays the total of all fines/fees for all students.
+         */
+        function calculateAndDisplayTotalFines() {
+            let grandTotalFines = 0;
+            if (!currentRegisterData || !currentRegisterData.students) {
+                showMessage("کوئی رجسٹر لوڈ نہیں ہوا یا کوئی طالب علم موجود نہیں۔");
+                return;
+            }
+
+            students.forEach(student => {
+                if (student.fines) {
+                    for (const date in student.fines) {
+                        const fineValue = parseFloat(student.fines[date]);
+                        if (!isNaN(fineValue)) {
+                            grandTotalFines += fineValue;
+                        }
+                    }
+                }
+            });
+            showMessage(`تمام طلباء کا کل جرمانہ/فیس: ${grandTotalFines}`);
+        }
+
+        /**
+         * Handles the search functionality to display a student's full record in a modal.
+         */
+        function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) {
+                showMessage("براہ کرم تلاش کرنے کے لیے طالب علم کا نام درج کریں۔");
+                return;
+            }
+
+            const foundStudent = students.find(student =>
+                student.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            if (foundStudent) {
+                currentHistoryStudentId = foundStudent.id;
+                populateHistoryMonthSelector(); // Populate month selector in history modal
+                historyYearSelector.value = new Date().getFullYear(); // Set current year as default
+                renderStudentHistory(foundStudent.id, new Date().getMonth(), new Date().getFullYear()); // Initial render for current month/year
+                studentHistoryModal.style.display = 'flex'; // Show the history modal
+            } else {
+                showMessage(`" ${searchTerm} " نام کا کوئی طالب علم نہیں ملا۔`);
+            }
+        }
+
+        /**
+         * Generates and saves the student history table as an image (PNG).
+         */
+        async function shareHistoryImage() {
+            if (!currentHistoryStudentId) {
+                showMessage("شیئر کرنے کے لیے کوئی ریکارڈ موجود نہیں۔");
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const historyModalContent = studentHistoryModal.querySelector('.modal-content');
+                // Temporarily adjust modal content width to ensure all content fits for capture
+                const originalMaxWidth = historyModalContent.style.maxWidth;
+                historyModalContent.style.maxWidth = 'fit-content'; 
+
+                const canvas = await html2canvas(historyModalContent, {
+                    scale: 2, // Increase scale for better resolution
+                    useCORS: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: document.documentElement.offsetWidth,
+                    windowHeight: document.documentElement.offsetHeight
+                });
+
+                // Restore original max-width
+                historyModalContent.style.maxWidth = originalMaxWidth;
+
+                const student = students.find(s => s.id === currentHistoryStudentId);
+                const filename = `حاضری_ریکارڈ_${student.name}_${formatDate(new Date())}.png`;
+
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage("ریکارڈ امیج کامیابی سے تیار ہو گئی۔");
+            }
+            catch (error) {
+                console.error("Error sharing history image:", error);
+                showMessage("ریکارڈ امیج محفوظ کرنے میں خرابی پیش آئی: " + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        /**
+         * Analyzes student performance using Gemini API and displays the result.
+         * @param {string} studentId - The ID of the student to analyze.
+         */
+        async function analyzeStudentPerformance(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) {
+                showMessage("طالب علم نہیں ملا۔");
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                let attendanceRecord = '';
+                for (const date in student.attendance) {
+                    attendanceRecord += `${formatUrduDate(date)}: ${attendanceOptions[student.attendance[date]]}\n`;
+                }
+
+                let fineRecord = '';
+                if (student.fines) {
+                    for (const date in student.fines) {
+                        if (student.fines[date]) {
+                            fineRecord += `${formatUrduDate(date)}: ${student.fines[date]}\n`;
+                        }
+                    }
+                }
+
+                const prompt = `ایک طالب علم کی حاضری اور جرمانے کے ریکارڈ کا تجزیہ کریں اور اس کی کارکردگی پر ایک جامع خلاصہ فراہم کریں۔ درج ذیل ڈیٹا استعمال کریں:
+
+طالب علم کا نام: ${student.name}
+
+حاضری کا ریکارڈ (تاریخ: حالت):
+${attendanceRecord || 'کوئی حاضری ریکارڈ نہیں ہے۔'}
+
+جرمانے کا ریکارڈ (تاریخ: رقم):
+${fineRecord || 'کوئی جرمانہ ریکارڈ نہیں ہے۔'}
+
+خلاصے میں درج ذیل نکات شامل کریں:
+1.  طالب علم کی مجموعی حاضری کا رجحان (اچھی، اوسط، کمزور)۔
+2.  غیر حاضری یا رخصت کی وجوہات (اگر ڈیٹا میں کوئی پیٹرن نظر آئے)۔
+3.  جرمانے/فیس کی ادائیگی کا رجحان۔
+4.  مجموعی کارکردگی پر تبصرہ اور بہتری کے لیے تجاویز (اگر قابل اطلاق ہوں)۔
+
+خلاصہ اردو میں اور زیادہ سے زیادہ 150 الفاظ پر مشتمل ہو۔`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // If you want to use models other than gemini-2.0-flash or imagen-3.0-generate-002, provide an API key here. Otherwise, leave this as-is.
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const analysisText = result.candidates[0].content.parts[0].text;
+                    llmAnalysisContent.textContent = analysisText;
+                    llmAnalysisModal.style.display = 'flex'; // Show the LLM analysis modal
+                } else {
+                    showMessage("تجزیہ تیار کرنے میں ناکامی۔");
+                    console.error("Gemini API response structure unexpected:", result);
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                showMessage("تجزیہ تیار کرنے میں خرابی پیش آئی: " + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+
+        // --- Event Listeners ---
+        loadOrCreateRegisterBtn.addEventListener('click', loadOrCreateRegister); // Renamed button
+        addStudentBtn.addEventListener('click', handleAddStudent);
+        saveImageBtn.addEventListener('click', saveImage); // Event listener for saveImageBtn
+        totalFinesBtn.addEventListener('click', calculateAndDisplayTotalFines); // New event listener
+        selectedDateInput.addEventListener('change', () => {
+            // Re-render table to ensure totals and previous day's absent indicators are up-to-date
+            renderTable();
+        });
+
+        // Search event listeners
+        searchBtn.addEventListener('click', handleSearch);
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+
+        // History modal controls
+        historyMonthSelector.addEventListener('change', () => {
+            renderStudentHistory(currentHistoryStudentId, parseInt(historyMonthSelector.value), parseInt(historyYearSelector.value));
+        });
+        historyYearSelector.addEventListener('change', () => {
+            renderStudentHistory(currentHistoryStudentId, parseInt(historyMonthSelector.value), parseInt(historyYearSelector.value));
+        });
+        shareHistoryImageBtn.addEventListener('click', shareHistoryImage);
+        analyzePerformanceBtn.addEventListener('click', () => analyzeStudentPerformance(currentHistoryStudentId)); // New LLM button event listener
+
+        // Existing registers selector (direct change also triggers load)
+        existingRegistersSelector.addEventListener('change', handleLoadSelectedRegister);
+
+        // Monthly Download event listeners
+        downloadMonthlyDataBtn.addEventListener('click', downloadMonthlyData);
+        downloadMonthSelector.addEventListener('change', () => {
+            noDownloadDataMessage.style.display = 'none'; // Hide message when month changes
+        });
+        downloadYearSelector.addEventListener('change', () => {
+            noDownloadDataMessage.style.display = 'none'; // Hide message when year changes
+        });
+
+
+        // --- Initial Setup on Page Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set current date as default for the date input
+            const today = new Date();
+            selectedDateInput.value = formatDate(today);
+
+            loadAllRegistersList(); // Load the list of all registers
+            populateRegisterSelector(); // Populate the dropdown
+            populateDownloadSelectors(); // Populate the download month/year selectors
+
+            // Initially, no register is loaded, so clear the input and display no data message
+            currentRegisterId = null;
+            currentRegisterData = null;
+            students = [];
+            registerTitleInput.value = ""; // Clear the input field
+            renderTable(); // Render an empty table
+            currentRegisterInfo.textContent = '';
+            noDataMessage.style.display = 'block';
+            noDataMessage.textContent = 'براہ کرم ایک رجسٹر لوڈ/بنائیں یا موجودہ رجسٹرز سے منتخب کریں۔';
+            
+            renderMonthlySummaryTable(); // Render initial empty monthly summary
+            noDownloadDataMessage.style.display = 'block'; // Hide download message initially
+        });
+
+    </script>
+</body>
+</html>
